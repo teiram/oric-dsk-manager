@@ -16,7 +16,7 @@ List of current features:
 - Disk usage bar
 
 ## Compilation
-java and maven are needed. Once you have cloned the repository, just type:
+java (8 or newer) and maven are needed. Once you have cloned the repository, just type:
 
     mvn install
     
@@ -34,7 +34,7 @@ Below the file properties some disk properties are shown and can be also changed
 
 Disk geometry can be also modified on the fly using the spinners below.
 
-Once you are happy with the content of the disk, launch its generation by pressing the "Create Dsk" button or the menu entry "Save Dsk".
+Once you are happintellij jre y with the content of the disk, launch its generation by pressing the "Create Dsk" button or the menu entry "Save Dsk".
 
 There's also a menu entry to open a Dsk. When selected, a whole Dsk will be imported, including geometry, disk name and init string, discarding the current content of the disk image.
 
