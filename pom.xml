@@ -13,7 +13,7 @@
     <scm>
         <connection>scm:git:git@github.com:teiram/oric-dsk-manager.git</connection>
         <url>scm:git:git@github.com:teiram/oric-dsk-manager.git</url>
-        <developerConnection>scm:git:git@github.com:teiram/orig-dsk-manager.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:teiram/oric-dsk-manager.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
 
