@@ -289,8 +289,7 @@ public class MainAppController {
                     .showAndWait();
 
             if (result.orElse(ButtonType.CANCEL) == ButtonType.OK) {
-                applicationContext.getFileSystem().clear();
-                applicationContext.setDiskGeometry(Constants.DEFAULT_DISK_GEOMETRY);
+                applicationContext.clear();
             }
         });
 

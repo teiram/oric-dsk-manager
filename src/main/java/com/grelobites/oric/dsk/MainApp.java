@@ -4,20 +4,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
 
 import com.grelobites.oric.dsk.util.LocaleUtil;
 import com.grelobites.oric.dsk.view.MainAppController;
+import com.grelobites.oric.dsk.view.util.DialogUtil;
 import com.grelobites.oric.dsk.view.util.DirectoryAwareFileChooser;
 import de.codecentric.centerdevice.MenuToolkit;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
@@ -42,6 +40,7 @@ public class MainApp extends Application {
         Menu fileMenu = new Menu(LocaleUtil.i18n("fileMenuTitle"));
 
         fileMenu.getItems().addAll(
+                newDskMenuItem(scene, applicationContext),
                 openDskMenuItem(scene, applicationContext),
                 mergeDskMenuItem(scene, applicationContext),
                 saveDskMenuItem(scene, applicationContext),
@@ -61,6 +60,29 @@ public class MainApp extends Application {
         }
     }
 
+    private MenuItem newDskMenuItem(Scene scene, ApplicationContext context) {
+        MenuItem newDsk = new MenuItem((LocaleUtil.i18n("newDskMenuEntry")));
+        newDsk.setAccelerator(
+                KeyCombination.keyCombination("SHORTCUT+N")
+        );
+
+        newDsk.setOnAction(f -> {
+            if (applicationContext.getArchiveList().size() > 0) {
+                Optional<ButtonType> result = DialogUtil
+                        .buildAlert(LocaleUtil.i18n("archiveDeletionConfirmTitle"),
+                                LocaleUtil.i18n("archiveDeletionConfirmHeader"),
+                                LocaleUtil.i18n("archiveDeletionConfirmContent"))
+                        .showAndWait();
+
+                if (result.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                    applicationContext.clear();
+                }
+            } else {
+                applicationContext.clear();
+            }
+        });
+        return newDsk;
+    }
 
     private MenuItem exportCurrentArchiveMenuItem(ApplicationContext applicationContext) {
         MenuItem exportArchive = new MenuItem(LocaleUtil.i18n("exportArchiveMenuEntry"));
@@ -75,6 +97,11 @@ public class MainApp extends Application {
                 applicationContext.exportCurrentArchive();
             } catch (Exception e) {
                 LOGGER.error("Exporting current installable", e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
             }
         });
         return exportArchive;
@@ -97,6 +124,11 @@ public class MainApp extends Application {
                 }
             } catch (Exception e) {
                 LOGGER.error("Reading Dsk from file " +  fsFile, e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
             }
         });
         return openDsk;
@@ -119,6 +151,11 @@ public class MainApp extends Application {
                 }
             } catch (Exception e) {
                 LOGGER.error("Merging from file " +  fsFile, e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
             }
         });
         return mergeDsk;
@@ -143,6 +180,11 @@ public class MainApp extends Application {
                 }
             } catch (Exception e) {
                 LOGGER.error("Saving Dsk to " +  fsFile, e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
             }
         });
         return saveDsk;
@@ -178,7 +220,7 @@ public class MainApp extends Application {
             Scene aboutScene = new Scene(getAboutPane());
             aboutScene.getStylesheets().add(Constants.getThemeResourceUrl());
             aboutStage.setScene(aboutScene);
-            aboutStage.setTitle("");
+            aboutStage.setTitle(LocaleUtil.i18n("aboutTitle"));
             aboutStage.initModality(Modality.APPLICATION_MODAL);
             aboutStage.initOwner(primaryStage.getOwner());
             aboutStage.setResizable(false);

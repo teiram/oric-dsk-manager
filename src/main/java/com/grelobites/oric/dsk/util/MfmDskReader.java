@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class MfmDskReader implements DskReader {
                         LOGGER.debug("Sector metadata{trackId: " + trackId
                                 + ", side: " + side + ", sectorId: " + sectorId
                                 + ", sectorSize: " + sectorSize + "}");
-                        buffer.position(buffer.position() + 2); //Skip CRC
+                        buffer.position( ((Buffer) buffer).position() + 2); //Skip CRC
                         state = State.GAP2;
                         counter = 0;
                         break;
@@ -144,12 +145,12 @@ public class MfmDskReader implements DskReader {
                         }
                         break;
                     case FB_MARK:
-                        buffer.position(buffer.position() - 1);
+                        buffer.position(((Buffer) buffer).position() - 1);
                         byte[] sectorData = new byte[sectorSize];
                         buffer.get(sectorData);
                         trackData.put(sectorId, sectorData);
                         //Skip CRC
-                        buffer.position(buffer.position() + 2);
+                        buffer.position(((Buffer) buffer).position() + 2);
                         state = State.GAP3;
                         counter = 0;
                         break;

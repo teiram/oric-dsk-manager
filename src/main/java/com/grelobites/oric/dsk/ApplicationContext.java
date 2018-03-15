@@ -201,6 +201,11 @@ public class ApplicationContext {
         getFileSystem().exportFileSystem(stream);
     }
 
+    public void clear() {
+        getFileSystem().clear();
+        setDiskGeometry(Constants.DEFAULT_DISK_GEOMETRY);
+    }
+
     public DiskGeometry getDiskGeometry() {
         return diskGeometry.get();
     }

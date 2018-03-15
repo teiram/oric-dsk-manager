@@ -158,6 +158,8 @@ public class SedoricFileSystem {
 
     public void clear() {
         getArchiveList().clear();
+        setName("");
+        setInitString("");
     }
 
     public List<SedoricArchive> getArchiveList() {
