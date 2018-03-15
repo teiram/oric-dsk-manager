@@ -16,19 +16,16 @@ List of current features:
 - Disk usage bar
 
 ##Compilation
-
 java and maven are needed. Once you have cloned the repository, just type:
 
     mvn install
     
 ##Running the application
-
 Probably double clicking the generated jar would be enough. Otherwise, you can run it on a console by executing:
 
     java -jar oric-dsk-manager-jar-with-dependencies-0.1.jar
     
 ##Usage
-
 Just drop archives from the host filesystem to the file list on the left side. They would be autodetected as old or new DSK images, TAPs or regular files. Menu entries are also provided for this function.
 
 Selecting a file from the list shows the extended properties of the file on the right side. Change here the name or the flags of the selected file
