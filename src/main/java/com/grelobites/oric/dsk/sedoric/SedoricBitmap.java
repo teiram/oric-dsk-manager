@@ -23,14 +23,16 @@ public class SedoricBitmap {
 
     public SedoricBitmap(DiskGeometry diskGeometry) {
         this.diskGeometry = diskGeometry;
-        trackOffsets = new int[diskGeometry.getTrackCount()];
+        int trackCount = diskGeometry.getTrackCount() * diskGeometry.getSideCount();
+        trackOffsets = new int[trackCount + 1];
         freeSectors = 0;
-        for (int i = 0; i < diskGeometry.getTrackCount(); i++) {
+        for (int i = 0; i < trackCount; i++) {
             trackOffsets[i] = freeSectors;
             freeSectors += diskGeometry.getTrackGeometry(i).getSectorCount();
             LOGGER.debug("Accumulated sectors after track {} are {}",
                     i, freeSectors);
         }
+        trackOffsets[trackOffsets.length - 1] = freeSectors;
 
         LOGGER.debug("Bitmap with {} sectors", freeSectors);
         int bitmapSize = (freeSectors + 0x07) >> 3;
@@ -43,9 +45,9 @@ public class SedoricBitmap {
         LOGGER.debug("allocateSector " + sectorCoordinates);
         if (freeSectors > 0) {
             int correctedSector = sectorCoordinates.getSector() - 1;
-            int bitmapOffset = (trackOffsets[sectorCoordinates.getTrack()] +
-                + correctedSector) >> 3;
-            int byteOffset = correctedSector & 0x07;
+            int trackOffset = trackOffsets[sectorCoordinates.getTrack()];
+            int bitmapOffset = (trackOffset + correctedSector) >> 3;
+            int byteOffset = (trackOffset + correctedSector) & 0x07;
             bitmap[bitmapOffset] &= ~(1 << byteOffset);
             freeSectors--;
             return sectorCoordinates;
@@ -55,7 +57,7 @@ public class SedoricBitmap {
     }
 
     private SectorCoordinates fromLinearSector(int linearSector) {
-        for (int i = 0; i < trackOffsets.length - 1; i++) {
+        for (int i = 0; i < trackOffsets.length; i++) {
             if (trackOffsets[i + 1] > linearSector) {
                 int track = i;
                 int sector = (linearSector - trackOffsets[track]);
@@ -64,6 +66,8 @@ public class SedoricBitmap {
                 return new SectorCoordinates(track, sector);
             }
         }
+        //We shall be in the last track
+
         throw new IllegalStateException("No free sector found");
     }
 
@@ -81,6 +85,10 @@ public class SedoricBitmap {
         } else {
             throw new IllegalStateException("Bitmap space exhausted");
         }
+    }
+
+    public int freeSectors() {
+        return freeSectors;
     }
 
     public void flush(Disk disk, int fileCount, int directorySectorCount) {

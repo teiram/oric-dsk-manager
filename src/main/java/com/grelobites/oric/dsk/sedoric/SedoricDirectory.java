@@ -134,7 +134,9 @@ public class SedoricDirectory {
                 descriptorLocation.getTrack(),
                 descriptorLocation.getSector(),
                 disk);
-        LOGGER.debug("Got descriptor " + descriptor);
+        LOGGER.debug("Got descriptor {} with sector count {} for directory {}",
+                descriptor, descriptor.getFileSectors().size(),
+                this);
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         descriptor.getFileSectors().forEach(c -> {
             try {
@@ -155,9 +157,10 @@ public class SedoricDirectory {
 
     private static void addDirectoryEntries(List<SedoricDirectory> list, byte[] sector,
                                             int offset, int size) {
-        LOGGER.debug("addDirectoryEntries with offset " + offset + " and size " + size);
-        while (sector[offset] != 0 && offset < size) {
-            ByteBuffer buffer = ByteBuffer.wrap(sector, offset, offset + DIRECTORY_SIZE);
+        LOGGER.debug("addDirectoryEntries with offset {} and size {}", offset, size);
+        while (offset < size && sector[offset] != 0) {
+            LOGGER.debug("Iteration with offset {} for a sector of size {}", offset, sector.length);
+            ByteBuffer buffer = ByteBuffer.wrap(sector, offset, DIRECTORY_SIZE);
             byte[] nameBytes = new byte[Constants.SEDORIC_FILENAME_MAXLENGTH];
             byte[] extensionBytes = new byte[Constants.SEDORIC_FILEEXTENSION_MAXLENGTH];
             buffer.get(nameBytes).get(extensionBytes);

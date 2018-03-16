@@ -26,7 +26,7 @@ public class SectorCoordinates {
     }
 
     public boolean isValid() {
-        return track > 0;
+        return !(track == 0 && sector == 0);
     }
 
     @Override

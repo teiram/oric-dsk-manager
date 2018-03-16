@@ -23,16 +23,13 @@ public class SedoricDescriptor {
     private boolean block;
     private int sectors;
 
-    private List<SectorCoordinates> fileSectors;
+    private List<SectorCoordinates> fileSectors = new ArrayList<>();
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
     public void addFileSector(SectorCoordinates sectorCoordinates) {
-        if (fileSectors == null) {
-            fileSectors = new ArrayList<>();
-        }
         fileSectors.add(sectorCoordinates);
     }
 
@@ -136,6 +133,7 @@ public class SedoricDescriptor {
         int track = descriptorTrack;
         int sector = descriptorSector;
         int offset = HEADER_LENGTH;
+        int sectorCount = 0;
         do {
             LOGGER.debug("Searching for descriptors in sector(" + track + ", " + sector
                     + ") @" + offset);
@@ -147,15 +145,17 @@ public class SedoricDescriptor {
                 );
                 if (coordinates.isValid()) {
                     descriptor.addFileSector(coordinates);
+                    sectorCount++;
                 } else {
-                    LOGGER.debug("Found invalid file coordinates: " + coordinates);
+                    LOGGER.debug("Found invalid file coordinates {} with count {}",
+                            coordinates, sectorCount);
                     break;
                 }
             }
             track = Util.asUnsignedByte(sectorData[0]);
             sector = Util.asUnsignedByte(sectorData[1]);
             offset = 2;
-        } while (track != 0);
+        } while (track != 0 && sectorCount < descriptor.getSectors());
         return descriptor;
     }
 

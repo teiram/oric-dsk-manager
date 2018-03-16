@@ -170,9 +170,40 @@ public class SedoricFileSystem {
         return getDiskGeometry().capacityBinding().get();
     }
 
+    private int descriptorSectorsForSectorCount(int fileSectors) {
+        int descriptorSectors = 1;
+        int remainingSectors = fileSectors - (Constants.SECTOR_SIZE - 12) / 2;
+        while (remainingSectors > 0) {
+            descriptorSectors++;
+            remainingSectors -= (Constants.SECTOR_SIZE - 2) / 2;
+        }
+        return descriptorSectors;
+    }
+
+    private  int correctedFileSize(int size) {
+        //This is not accurate, because each track could have a different geometry
+        //We would need to simulate disk population each time a change is made
+        //So let's assume we are using 256 bytes sectors
+        int fileSectors = (size + Constants.SECTOR_SIZE - 1) / Constants.SECTOR_SIZE;
+        return (fileSectors + descriptorSectorsForSectorCount(fileSectors)) *
+                Constants.SECTOR_SIZE;
+    }
+
+    private int getDirectoryBytes() {
+        int directorySectors = 1;
+        int directoryEntriesPerSector = (Constants.SECTOR_SIZE - 16) / 16;
+        int remainingFiles = getArchiveList().size() - directoryEntriesPerSector;
+        while (remainingFiles > 0) {
+            directorySectors++;
+            remainingFiles -= (Constants.SECTOR_SIZE - 16) / 16;
+        }
+        return directorySectors * Constants.SECTOR_SIZE;
+    }
+
     public int getUsedBytes() {
         int bytes =  getArchiveList().stream()
-                .mapToInt(a -> a.getSize()).sum();
+                .mapToInt(a -> correctedFileSize(a.getSize())).sum();
+        bytes += getDirectoryBytes();
         if (getBootable()) {
             try {
                 bytes += Constants.getSedoricBootStrap().length;
