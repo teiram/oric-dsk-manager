@@ -95,17 +95,17 @@ public class SedoricBitmap {
         byte[] sectorData = disk.getSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
                 Constants.SEDORIC_BITMAP_SECTOR));
         Arrays.fill(sectorData, BITMAP_HEADER_LENGTH, sectorData.length, (byte) 0xFF);
-
+        int trackCount = diskGeometry.getTrackCount();
         ByteBuffer buffer = ByteBuffer.wrap(sectorData)
                 .order(ByteOrder.LITTLE_ENDIAN);
         buffer.put((byte) 0xff)
                 .put((byte) 0)
                 .putShort((short) freeSectors)
                 .putShort((short) fileCount)
-                .put((byte) diskGeometry.getTrackCount())
+                .put((byte) trackCount)
                 .put((byte) diskGeometry.getTrackGeometry(0).getSectorCount())
                 .put((byte) directorySectorCount)
-                .put((byte) (diskGeometry.getTrackCount() | (diskGeometry.getSideCount() == 2 ?
+                .put((byte) (trackCount | (diskGeometry.getSideCount() == 2 ?
                     0x80 : 0x00)))
                 .put((byte) 0)
                 .put(bitmap);
