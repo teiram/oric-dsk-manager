@@ -74,16 +74,19 @@ public class DskUtil {
             LOGGER.debug("Dumping track with geometry {}", trackGeometry);
             ByteBuffer buffer = ByteBuffer.wrap(new byte[6400]);
             buffer.put(Util.filledByteArray(trackGeometry.getTrackLead(), (byte) 0x4E));
+
             for (int sector = 0; sector < trackGeometry.getSectorCount(); sector++) {
                 buffer.put(Util.filledByteArray(12, (byte) 0))
                         .put(Util.filledByteArray(3, (byte) 0xA1))
                         .put((byte) 0xFE)
-                        .put((byte) (track / diskGeometry.getSideCount()))
+                        .put((byte) (track))
                         .put((byte) trackGeometry.getSide())
                         .put((byte) (sector + 1))
                         .put((byte) encodeSectorSize(trackGeometry.getSectorSize()))
                         .putShort(Util.crc16(buffer, 8))
                         .put(Util.filledByteArray(trackGeometry.getGap2(), (byte) 0x22))
+                        //.put(Util.filledByteArray(trackGeometry.getGap2(), (byte) 0x4E))
+
                         .put(Util.filledByteArray(12, (byte) 0))
                         .put(Util.filledByteArray(3, (byte) 0xA1))
                         .put((byte) 0xFB)
@@ -91,6 +94,7 @@ public class DskUtil {
                         .putShort(Util.crc16(buffer, trackGeometry.getSectorSize() + 4))
                         .put(Util.filledByteArray(trackGeometry.getGap3(), (byte) 0x4E));
             }
+            buffer.put(Util.filledByteArray(6400 - buffer.position(), (byte) 0x4E));
             os.write(buffer.array());
         }
 
