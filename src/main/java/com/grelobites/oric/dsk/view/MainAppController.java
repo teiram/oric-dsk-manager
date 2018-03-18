@@ -308,7 +308,7 @@ public class MainAppController {
                 });
 
         trackCount.setValueFactory(new SpinnerValueFactory
-                .IntegerSpinnerValueFactory(1, 40, applicationContext.getDiskGeometry()
+                .IntegerSpinnerValueFactory(1, 82, applicationContext.getDiskGeometry()
                 .getTrackCount()));
         sideCount.setValueFactory(new SpinnerValueFactory
                 .IntegerSpinnerValueFactory(1, 2, applicationContext.getDiskGeometry()
