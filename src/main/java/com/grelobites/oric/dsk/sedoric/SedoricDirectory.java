@@ -2,6 +2,7 @@ package com.grelobites.oric.dsk.sedoric;
 
 import com.grelobites.oric.dsk.Constants;
 import com.grelobites.oric.dsk.model.Disk;
+import com.grelobites.oric.dsk.model.DiskGeometry;
 import com.grelobites.oric.dsk.model.SectorCoordinates;
 import com.grelobites.oric.dsk.util.Util;
 import org.slf4j.Logger;
@@ -30,7 +31,6 @@ import java.util.List;
 
 public class SedoricDirectory {
     private static final Logger LOGGER = LoggerFactory.getLogger(SedoricDirectory.class);
-    private static final int DIRECTORY_SECTOR = 4;
     private static final int DIRECTORY_SIZE = 16;
     private static final byte PADDING_BYTE = (byte) ' ';
 
@@ -130,17 +130,17 @@ public class SedoricDirectory {
     }
 
     public SedoricArchive getArchive(Disk disk) {
+        LOGGER.debug("Getting archive for directory {}", this);
         SedoricDescriptor descriptor = SedoricDescriptor.forSector(
                 descriptorLocation.getTrack(),
                 descriptorLocation.getSector(),
                 disk);
-        LOGGER.debug("Got descriptor {} with sector count {} for directory {}",
-                descriptor, descriptor.getFileSectors().size(),
-                this);
+        LOGGER.debug("Got descriptor {} with sector count {}",
+                descriptor, descriptor.getFileSectors().size());
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         descriptor.getFileSectors().forEach(c -> {
             try {
-                data.write(disk.getSector(c.getTrack(), c.getSector()));
+                data.write(disk.getSectorFromEncodedTrack(new SectorCoordinates(c.getTrack(), c.getSector())));
             } catch (IOException ioe) {
                 LOGGER.error("Writing data to file buffer", ioe);
             }
@@ -184,11 +184,14 @@ public class SedoricDirectory {
         int track = Constants.SEDORIC_DIRECTORY_TRACK;
         int sector = Constants.SEDORIC_DIRECTORY_SECTOR;
         do {
-            byte[] sectorData = disk.getSector(track, sector);
+            byte[] sectorData = disk.getSectorFromEncodedTrack(new SectorCoordinates(track, sector));
             addDirectoryEntries(result, sectorData, DIRECTORY_SIZE, disk.getGeometry()
                     .getTrackGeometry(track).getSectorSize());
-            track = sectorData[0];
-            sector = sectorData[1];
+            LOGGER.debug("Sector {}, {} points to Sector {}, {}", track, sector, sectorData[0], sectorData[1]);
+            track = sectorData[0] & 0xff;
+            sector = sectorData[1] & 0xff;
+
+            LOGGER.debug("File count is {}", result.size());
         } while (track != 0);
         return result;
     }

@@ -1,10 +1,7 @@
 package com.grelobites.oric.dsk.util;
 
 import com.grelobites.oric.dsk.Constants;
-import com.grelobites.oric.dsk.model.Disk;
-import com.grelobites.oric.dsk.model.DiskGeometry;
-import com.grelobites.oric.dsk.model.DskReaderFactory;
-import com.grelobites.oric.dsk.model.TrackGeometry;
+import com.grelobites.oric.dsk.model.*;
 import com.grelobites.oric.dsk.sedoric.DskHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +87,7 @@ public class DskUtil {
                         .put(Util.filledByteArray(12, (byte) 0))
                         .put(Util.filledByteArray(3, (byte) 0xA1))
                         .put((byte) 0xFB)
-                        .put(disk.getSector(track, sector + 1))
+                        .put(disk.getSector(new SectorCoordinates(track, sector + 1)))
                         .putShort(Util.crc16(buffer, trackGeometry.getSectorSize() + 4))
                         .put(Util.filledByteArray(trackGeometry.getGap3(), (byte) 0x4E));
             }

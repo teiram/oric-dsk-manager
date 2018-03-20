@@ -2,6 +2,7 @@ package com.grelobites.oric.dsk.sedoric;
 
 import com.grelobites.oric.dsk.Constants;
 import com.grelobites.oric.dsk.model.Disk;
+import com.grelobites.oric.dsk.model.DiskGeometry;
 import com.grelobites.oric.dsk.model.SectorCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,9 @@ public class DirectoryWriter {
         sectorData[2] = (byte) position;
         directoryCount++;
         if (position >= sectorData.length) {
-            LOGGER.debug("Allocating new directory sector");
             currentSector = bitmap.getFreeSector();
-            sectorData[0] = (byte) currentSector.getTrack();
+            LOGGER.debug("Allocating new directory sector to {}", currentSector);
+            sectorData[0] = (byte) disk.getGeometry().encodeTrack(currentSector.getTrack());
             sectorData[1] = (byte) currentSector.getSector();
             sectorData = disk.getSector(currentSector);
             position = DIRECTORY_SIZE;

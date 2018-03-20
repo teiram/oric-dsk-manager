@@ -177,6 +177,7 @@ public class MfmDskReader implements DskReader {
             LOGGER.debug("Added track geometry " + trackGeometry);
             geometry.setTrackGeometry(i, trackGeometry);
         }
+        LOGGER.debug("Calculated disk geometry {}", geometry);
         return new Disk(tracks, geometry);
     }
 

@@ -45,19 +45,21 @@ public class DescriptorWriter {
         descriptor.setFileSectors(sectorList);
         int descriptorSectors = 1;
         SectorCoordinates descriptorLocation = bitmap.getFreeSector();
-        directory.setDescriptorLocation(descriptorLocation);
+        directory.setDescriptorLocation(new SectorCoordinates(
+                disk.getGeometry().encodeTrack(descriptorLocation.getTrack()),
+                descriptorLocation.getSector()));
         byte[] sectorData = disk.getSector(descriptorLocation);
         writeDescriptorData(sectorData, descriptor);
         int offset = 0x0c;
 
         for (SectorCoordinates item : sectorList) {
-            sectorData[offset++] = (byte) item.getTrack();
+            sectorData[offset++] = (byte) disk.getGeometry().encodeTrack(item.getTrack());
             sectorData[offset++] = (byte) item.getSector();
             if (offset >= sectorData.length) {
                 offset = 2;
                 descriptorSectors++;
                 descriptorLocation = bitmap.getFreeSector();
-                sectorData[0] = (byte) descriptorLocation.getTrack();
+                sectorData[0] = (byte) disk.getGeometry().encodeTrack(descriptorLocation.getTrack());
                 sectorData[1] = (byte) descriptorLocation.getSector();
                 sectorData = disk.getSector(descriptorLocation);
             }

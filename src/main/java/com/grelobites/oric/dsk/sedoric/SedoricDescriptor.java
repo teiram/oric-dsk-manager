@@ -137,7 +137,7 @@ public class SedoricDescriptor {
         do {
             LOGGER.debug("Searching for descriptors in sector(" + track + ", " + sector
                     + ") @" + offset);
-            byte[] sectorData = disk.getSector(track, sector);
+            byte[] sectorData = disk.getSectorFromEncodedTrack(new SectorCoordinates(track, sector));
             while (offset < Constants.SECTOR_SIZE) {
                 SectorCoordinates coordinates = new SectorCoordinates(
                         Util.asUnsignedByte(sectorData[offset++]),
@@ -147,8 +147,8 @@ public class SedoricDescriptor {
                     descriptor.addFileSector(coordinates);
                     sectorCount++;
                 } else {
-                    LOGGER.debug("Found invalid file coordinates {} with count {}",
-                            coordinates, sectorCount);
+                    LOGGER.debug("Found invalid file coordinates {} with count {}, expected sectors {}",
+                            coordinates, sectorCount, descriptor.getSectors());
                     break;
                 }
             }
@@ -160,7 +160,8 @@ public class SedoricDescriptor {
     }
 
     public static SedoricDescriptor forSector(int descriptorTrack, int descriptorSector, Disk disk) {
-        ByteBuffer buffer = ByteBuffer.wrap(disk.getSector(descriptorTrack, descriptorSector),
+        ByteBuffer buffer = ByteBuffer.wrap(disk.getSectorFromEncodedTrack(
+                new SectorCoordinates(descriptorTrack, descriptorSector)),
                 2, HEADER_LENGTH)
                 .order(ByteOrder.LITTLE_ENDIAN);
         Builder builder = newBuilder();
@@ -175,6 +176,8 @@ public class SedoricDescriptor {
                     .build();
             return fillFileDescriptors(descriptor, descriptorTrack, descriptorSector, disk);
         } else {
+            LOGGER.debug("Found unexpected descriptor signature at ({}, {}). Sector is {}",
+                    descriptorTrack, descriptorSector, Util.dumpAsHexString(buffer.array()));
             throw new IllegalArgumentException("Unexpected descriptor signature");
         }
     }

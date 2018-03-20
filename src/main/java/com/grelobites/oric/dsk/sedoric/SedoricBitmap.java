@@ -17,7 +17,6 @@ public class SedoricBitmap {
     private static final int BITMAP_HEADER_LENGTH = 0x10;
     private DiskGeometry diskGeometry;
     private int[] trackOffsets;
-    private Integer sideOffset;
     private byte[] bitmap;
     private int freeSectors = 0;
 
@@ -39,6 +38,11 @@ public class SedoricBitmap {
         LOGGER.debug("Creating a bitmap of {} bytes", bitmapSize);
         bitmap = new byte[bitmapSize];
         Arrays.fill(bitmap, 0, bitmapSize, (byte) 0xff);
+    }
+
+    public boolean requiresTwoSectors() {
+        return bitmap.length > diskGeometry.getTrackGeometry(Constants.SEDORIC_DIRECTORY_TRACK)
+                .getSectorSize() - BITMAP_HEADER_LENGTH;
     }
 
     public SectorCoordinates  allocateSector(SectorCoordinates sectorCoordinates) {
@@ -91,11 +95,12 @@ public class SedoricBitmap {
         return freeSectors;
     }
 
-    public void flush(Disk disk, int fileCount, int directorySectorCount) {
-        byte[] sectorData = disk.getSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
-                Constants.SEDORIC_BITMAP_SECTOR));
+    private void writeBitmapSector(Disk disk, SectorCoordinates coordinates,
+                                   int trackCount, int sectorCount,
+                                   int fileCount, int directorySectorCount,
+                                   int offset, int size) {
+        byte[] sectorData = disk.getSector(coordinates);
         Arrays.fill(sectorData, BITMAP_HEADER_LENGTH, sectorData.length, (byte) 0xFF);
-        int trackCount = diskGeometry.getTrackCount();
         ByteBuffer buffer = ByteBuffer.wrap(sectorData)
                 .order(ByteOrder.LITTLE_ENDIAN);
         buffer.put((byte) 0xff)
@@ -103,11 +108,39 @@ public class SedoricBitmap {
                 .putShort((short) freeSectors)
                 .putShort((short) fileCount)
                 .put((byte) trackCount)
-                .put((byte) diskGeometry.getTrackGeometry(0).getSectorCount())
+                .put((byte) sectorCount)
                 .put((byte) directorySectorCount)
                 .put((byte) (trackCount | (diskGeometry.getSideCount() == 2 ?
-                    0x80 : 0x00)))
-                .put((byte) 0)
-                .put(bitmap);
+                        0x80 : 0x00)))
+                .putInt(0)
+                .putShort((short) 0)
+                .put(bitmap, offset, size);
+    }
+
+    public void flush(Disk disk, int fileCount, int directorySectorCount) {
+        int trackCount = diskGeometry.getTrackCount();
+        int sectorSize = diskGeometry.getTrackGeometry(Constants.SEDORIC_DIRECTORY_TRACK).getSectorSize();
+
+        int remaining = bitmap.length - sectorSize - BITMAP_HEADER_LENGTH;
+        LOGGER.debug("Inserting first bitmap  with size {}",
+                remaining > 0 ? sectorSize - BITMAP_HEADER_LENGTH : bitmap.length);
+        writeBitmapSector(disk,
+                new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
+                        Constants.SEDORIC_BITMAP_SECTOR),
+                trackCount, diskGeometry.getTrackGeometry(0).getSectorCount(),
+                fileCount, directorySectorCount, 0,
+                remaining > 0 ? sectorSize - BITMAP_HEADER_LENGTH : bitmap.length);
+        if (remaining > 0) {
+            LOGGER.debug("Inserting second bitmap from {} with length {}",
+                    sectorSize - BITMAP_HEADER_LENGTH,
+                    remaining);
+            writeBitmapSector(disk,
+                    new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
+                            Constants.SEDORIC_BITMAP_SECTOR + 1),
+                    trackCount, diskGeometry.getTrackGeometry(0).getSectorCount(),
+                    fileCount, directorySectorCount,
+                    sectorSize - BITMAP_HEADER_LENGTH,
+                    remaining);
+        }
     }
 }

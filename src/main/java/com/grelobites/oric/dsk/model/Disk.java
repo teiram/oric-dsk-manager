@@ -24,12 +24,24 @@ public class Disk {
         }
     }
 
+    public byte[] getSectorFromEncodedTrack(SectorCoordinates coordinates) {
+        return getSector(correctedTrack(coordinates.getTrack()), coordinates.getSector());
+    }
+
     public byte[] getSector(SectorCoordinates coordinates) {
         return getSector(coordinates.getTrack(), coordinates.getSector());
     }
 
-    public byte[] getSector(int track, int sector) {
-        return tracks[track].getSector(sector - 1);
+    private int correctedTrack(int track) {
+        return geometry.decodeTrack(track & 0xff);
+    }
+
+    private int correctedSector(int sector) {
+        return sector - 1;
+    }
+
+    private byte[] getSector(int track, int sector) {
+        return tracks[track].getSector(correctedSector(sector));
     }
 
     public DiskGeometry getGeometry() {

@@ -125,8 +125,8 @@ public class SedoricFileSystem {
         });
         SedoricSystemSector systemSector = SedoricSystemSector.fromInputStream(
                 new ByteArrayInputStream(disk
-                        .getSector(Constants.SEDORIC_DIRECTORY_TRACK,
-                                Constants.SEDORIC_SYSTEM_SECTOR)));
+                        .getSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
+                                Constants.SEDORIC_SYSTEM_SECTOR))));
         LOGGER.debug("Got system sector " + systemSector);
         name.set(systemSector.getName().trim());
         initString.set(systemSector.getInitString().trim());
@@ -227,6 +227,10 @@ public class SedoricFileSystem {
                         Constants.SEDORIC_SYSTEM_SECTOR));
         bitmap.allocateSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
                         Constants.SEDORIC_BITMAP_SECTOR));
+        if (bitmap.requiresTwoSectors()) {
+            bitmap.allocateSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
+                    Constants.SEDORIC_BITMAP_SECTOR + 1));
+        }
 
         if (getBootable()) {
             final byte[] bootstrap = Constants.getSedoricBootStrap();
