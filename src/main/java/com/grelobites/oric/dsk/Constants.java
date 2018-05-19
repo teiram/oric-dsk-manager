@@ -8,7 +8,7 @@ import com.grelobites.oric.dsk.util.Util;
 import java.io.IOException;
 
 public class Constants {
-    private static final String DEFAULT_VERSION = "0.4";
+    private static final String DEFAULT_VERSION = "0.6";
 
     public static final int SECTOR_SIZE = 256;
 
