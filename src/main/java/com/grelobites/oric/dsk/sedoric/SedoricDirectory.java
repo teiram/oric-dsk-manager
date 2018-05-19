@@ -183,11 +183,12 @@ public class SedoricDirectory {
         List<SedoricDirectory> result = new ArrayList<>();
         int track = Constants.SEDORIC_DIRECTORY_TRACK;
         int sector = Constants.SEDORIC_DIRECTORY_SECTOR;
+        final DiskGeometry geometry = disk.getGeometry();
         do {
             byte[] sectorData = disk.getSectorFromEncodedTrack(new SectorCoordinates(track, sector));
-            addDirectoryEntries(result, sectorData, DIRECTORY_SIZE, disk.getGeometry()
-                    .getTrackGeometry(track).getSectorSize());
-            LOGGER.debug("Sector {}, {} points to Sector {}, {}", track, sector, sectorData[0], sectorData[1]);
+            addDirectoryEntries(result, sectorData, DIRECTORY_SIZE, geometry
+                    .getTrackGeometry(geometry.decodeTrack(track)).getSectorSize());
+            LOGGER.debug("Sector {}, {} points to Sector {}, {}", track, sector, sectorData[0] & 0xff, sectorData[1] & 0xff);
             track = sectorData[0] & 0xff;
             sector = sectorData[1] & 0xff;
 
