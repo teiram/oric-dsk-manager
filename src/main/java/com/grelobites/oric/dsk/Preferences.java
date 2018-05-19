@@ -7,22 +7,14 @@ import org.slf4j.LoggerFactory;
 public class Preferences {
     private static final Logger LOGGER = LoggerFactory.getLogger(Preferences.class);
 
-    private static final String TRACKS_PROPERTY = "tracks";
-    private static final String SECTORS_PER_TRACK_PROPERTY = "sectorsPerTrack";
-    private static final String SIDES_PROPERTY = "sides";
+    private static final String LAST_USED_DIRECTORY_PROPERTY = "lastUsedDirectory";
 
-    private IntegerProperty tracks;
-    private IntegerProperty sectorsPerTrack;
-    private IntegerProperty sides;
-
-    private BooleanProperty validPreferences;
+    private StringProperty lastUsedDirectory;
 
     private static Preferences INSTANCE;
 
     private Preferences() {
-        this.tracks = new SimpleIntegerProperty(Constants.DEFAULT_NUM_TRACKS);
-        this.sectorsPerTrack = new SimpleIntegerProperty(Constants.DEFAULT_NUM_SECTORS_PER_TRACK);
-        this.sides = new SimpleIntegerProperty(Constants.DEFAULT_NUM_SIDES);
+        this.lastUsedDirectory = new SimpleStringProperty("");
     }
 
     public static Preferences getInstance() {
@@ -37,22 +29,18 @@ public class Preferences {
     }
 
 
-    public static java.util.prefs.Preferences getApplicationPreferences() {
+    private static java.util.prefs.Preferences getApplicationPreferences() {
         return java.util.prefs.Preferences.userNodeForPackage(Preferences.class);
     }
 
     private static Preferences setFromPreferences(Preferences preferences) {
         java.util.prefs.Preferences p = getApplicationPreferences();
-        preferences.setTracks(Integer.parseInt(p.get(TRACKS_PROPERTY,
-                Integer.toString(Constants.DEFAULT_NUM_TRACKS))));
-        preferences.setSectorsPerTrack(Integer.parseInt(p.get(SECTORS_PER_TRACK_PROPERTY,
-                Integer.toString(Constants.DEFAULT_NUM_SECTORS_PER_TRACK))));
-        preferences.setSides(Integer.parseInt(p.get(TRACKS_PROPERTY,
-                Integer.toString(Constants.DEFAULT_NUM_SIDES))));
+        preferences.setLastUsedDirectory(p.get(LAST_USED_DIRECTORY_PROPERTY, ""));
+        LOGGER.debug("Preferences loaded as {}", preferences);
         return preferences;
     }
 
-    public static void persistConfigurationValue(String key, String value) {
+    private static void persistConfigurationValue(String key, String value) {
         LOGGER.debug("persistConfigurationValue " + key + ", " + value);
         java.util.prefs.Preferences p = getApplicationPreferences();
         if (value != null) {
@@ -62,54 +50,23 @@ public class Preferences {
         }
     }
 
-    public int getTracks() {
-        return tracks.get();
+    public String getLastUsedDirectory() {
+        return lastUsedDirectory.get();
     }
 
-    public IntegerProperty tracksProperty() {
-        return tracks;
+    public StringProperty lastUsedDirectoryProperty() {
+        return lastUsedDirectory;
     }
 
-    public void setTracks(int tracks) {
-        persistConfigurationValue(TRACKS_PROPERTY, Integer.toString(tracks));
-        this.tracks.set(tracks);
+    public void setLastUsedDirectory(String lastUsedDirectory) {
+        persistConfigurationValue(LAST_USED_DIRECTORY_PROPERTY, lastUsedDirectory);
+        this.lastUsedDirectory.set(lastUsedDirectory);
     }
 
-    public int getSectorsPerTrack() {
-        return sectorsPerTrack.get();
-    }
-
-    public IntegerProperty sectorsPerTrackProperty() {
-        return sectorsPerTrack;
-    }
-
-    public void setSectorsPerTrack(int sectorsPerTrack) {
-        persistConfigurationValue(SECTORS_PER_TRACK_PROPERTY, Integer.toString(sectorsPerTrack));
-        this.sectorsPerTrack.set(sectorsPerTrack);
-    }
-
-    public int getSides() {
-        return sides.get();
-    }
-
-    public IntegerProperty sidesProperty() {
-        return sides;
-    }
-
-    public void setSides(int sides) {
-        persistConfigurationValue(SIDES_PROPERTY, Integer.toString(sides));
-        this.sides.set(sides);
-    }
-
-    public boolean isValidPreferences() {
-        return validPreferences.get();
-    }
-
-    public BooleanProperty validPreferencesProperty() {
-        return validPreferences;
-    }
-
-    public void setValidPreferences(boolean validPreferences) {
-        this.validPreferences.set(validPreferences);
+    @Override
+    public String toString() {
+        return "Preferences{" +
+                "lastUsedDirectory=" + lastUsedDirectory +
+                '}';
     }
 }

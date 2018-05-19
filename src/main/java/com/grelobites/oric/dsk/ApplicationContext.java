@@ -61,7 +61,8 @@ public class ApplicationContext {
         this.diskGeometry = new SimpleObjectProperty<>(DEFAULT_DISK_GEOMETRY);
         this.fileSystem = new SedoricFileSystem(this);
         this.generationAllowed = new SimpleBooleanProperty(true);
-        this.generationAllowed.bind(backgroundTaskCount.isEqualTo(0));
+        this.generationAllowed.bind(backgroundTaskCount.isEqualTo(0)
+                .and(diskUsage.lessThanOrEqualTo(1.0)));
     }
 
     public boolean isGenerationAllowed() {
@@ -99,6 +100,8 @@ public class ApplicationContext {
     public DirectoryAwareFileChooser getFileChooser() {
         if (this.fileChooser == null) {
             this.fileChooser = new DirectoryAwareFileChooser();
+            this.fileChooser.setInitialDirectory(Preferences.getInstance()
+                .getLastUsedDirectory());
         }
         fileChooser.setInitialFileName(null);
         return fileChooser;
