@@ -167,7 +167,7 @@ public class MainApp extends Application {
                 KeyCombination.keyCombination("SHORTCUT+S")
         );
         saveDsk.disableProperty().bind(applicationContext
-                .backgroundTaskCountProperty().greaterThan(0));
+                .generationAllowedProperty().not());
         saveDsk.setOnAction(f -> {
             DirectoryAwareFileChooser chooser = applicationContext.getFileChooser();
             chooser.setTitle(LocaleUtil.i18n("saveDskFileChooser"));
