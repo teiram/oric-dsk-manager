@@ -112,7 +112,7 @@ public class SedoricFileSystem {
         int totalBytes = getTotalBytes();
         context.setDiskUsage((1.0 * usedBytes) / totalBytes);
         context.setDiskUsageDetail(String.format(LocaleUtil.i18n("dskUsageDetail"),
-                totalBytes - usedBytes, totalBytes));
+                Math.max(0, totalBytes - usedBytes), totalBytes));
     }
 
     public void openDsk(InputStream stream) throws IOException {
