@@ -159,7 +159,7 @@ public class ArchiveUtil {
             if (SedoricHeader.needsHeader(sourceArchive)) {
                 fos.write(SedoricHeader.forArchive(sourceArchive).asByteArray());
             }
-            fos.write(sourceArchive.getData());
+            fos.write(sourceArchive.getData(), 0, sourceArchive.getSize());
         }
     }
 
