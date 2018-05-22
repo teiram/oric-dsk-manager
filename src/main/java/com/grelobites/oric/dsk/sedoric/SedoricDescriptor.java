@@ -160,9 +160,17 @@ public class SedoricDescriptor {
     }
 
     public static SedoricDescriptor forSector(int descriptorTrack, int descriptorSector, Disk disk) {
-        ByteBuffer buffer = ByteBuffer.wrap(disk.getSectorFromEncodedTrack(
-                new SectorCoordinates(descriptorTrack, descriptorSector)),
-                2, HEADER_LENGTH)
+        byte[] sectorData = disk
+                .getSectorFromEncodedTrack(
+                        new SectorCoordinates(descriptorTrack,
+                                descriptorSector));
+        if (sectorData[0] != 0) {
+            LOGGER.debug("Descriptor pointing to another sector:{}",
+                    Util.dumpAsHexString(disk.getSectorFromEncodedTrack(
+                            new SectorCoordinates(Util.asUnsignedByte(sectorData[0]),
+                                    Util.asUnsignedByte(sectorData[1])))));
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(sectorData,2, HEADER_LENGTH)
                 .order(ByteOrder.LITTLE_ENDIAN);
         Builder builder = newBuilder();
         if (Util.asUnsignedByte(buffer.get()) == DESCRIPTOR_SIGNATURE) {
