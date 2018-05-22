@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.grelobites</groupId>
 	<artifactId>oric-dsk-manager</artifactId>
-	<version>0.6-SNAPSHOT</version>
+	<version>0.6</version>
 	<name>Oric DSK Manager</name>
 
 	<properties>
