@@ -4,6 +4,7 @@ import com.grelobites.oric.dsk.Constants;
 import com.grelobites.oric.dsk.ApplicationContext;
 import com.grelobites.oric.dsk.model.Archive;
 import com.grelobites.oric.dsk.model.Disk;
+import com.grelobites.oric.dsk.oricdos.OricDosDirectory;
 import com.grelobites.oric.dsk.sedoric.SedoricArchive;
 import com.grelobites.oric.dsk.sedoric.SedoricDirectory;
 import com.grelobites.oric.dsk.sedoric.SedoricHeader;
@@ -117,11 +118,23 @@ public class ArchiveUtil {
 
     public static void addArchivesFromDsk(File file, ApplicationContext context) throws IOException {
         try (FileInputStream fis = new FileInputStream(file)) {
-            List<SedoricArchive> archiveList = new ArrayList<>();
             Disk disk = DskUtil.diskFromDskStream(fis);
-            SedoricDirectory.fromDisk(disk).forEach(d -> {
-                context.getArchiveList().add(updateArchiveName(d.getArchive(disk), context));
-            });
+            LOGGER.debug("Guessing disk format");
+            switch (DskUtil.getDiskFormat(disk)) {
+                case UNKNOWN:
+                case SEDORIC:
+                    SedoricDirectory.fromDisk(disk).forEach(d -> {
+                        context.getArchiveList().add(updateArchiveName(d.getArchive(disk), context));
+                    });
+                    break;
+                case ORICDOS:
+                    OricDosDirectory.fromDisk(disk).forEach(d -> {
+                        d.getArchive(disk).map(t ->
+                                context.getArchiveList().add(updateArchiveName(t, context)))
+                                .orElse(false);
+                    });
+                    break;
+            }
         }
     }
 

@@ -53,6 +53,28 @@ public class DskUtil {
         }
     }
 
+    public static DiskFormat getDiskFormat(Disk disk) {
+        for (DiskFormatDetector detector : DiskFormatDetector.values()) {
+            try {
+                ByteBuffer buffer = ByteBuffer.wrap(
+                        disk.getSector(new SectorCoordinates(detector.track,
+                                detector.sector)));
+                buffer.position(detector.offset);
+                byte[] searched = new byte[detector.size];
+                buffer.get(searched);
+                DiskFormat format = DiskFormat.byName(new String(searched));
+                if (format != null) {
+                    LOGGER.debug("Format detected as {} by {}", format, detector);
+                    return format;
+                }
+            } catch (Exception e) {
+                LOGGER.debug("Unable to apply detector {}", detector);
+            }
+        }
+        LOGGER.debug("No known format found in disk");
+        return DiskFormat.UNKNOWN;
+    }
+
     private static int encodeSectorSize(int sectorSize) {
         return sectorSize == 256 ? 1 : 2;
     }
