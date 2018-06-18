@@ -3,8 +3,10 @@ package com.grelobites.oric.dsk.sedoric;
 import com.grelobites.oric.dsk.ApplicationContext;
 import com.grelobites.oric.dsk.Constants;
 import com.grelobites.oric.dsk.model.Disk;
+import com.grelobites.oric.dsk.model.DiskFormat;
 import com.grelobites.oric.dsk.model.DiskGeometry;
 import com.grelobites.oric.dsk.model.SectorCoordinates;
+import com.grelobites.oric.dsk.oricdos.OricDosDirectory;
 import com.grelobites.oric.dsk.util.ArchiveUtil;
 import com.grelobites.oric.dsk.util.DskUtil;
 import com.grelobites.oric.dsk.util.LocaleUtil;
@@ -118,23 +120,31 @@ public class SedoricFileSystem {
     public void openDsk(InputStream stream) throws IOException {
         Disk disk = DskUtil.diskFromDskStream(stream);
 
-        SedoricDirectory.fromDisk(disk).forEach(d -> {
-            LOGGER.info("Read directory " + d);
-            SedoricArchive archive = d.getArchive(disk);
-            addArchive(ArchiveUtil.updateArchiveName(archive, context));
-        });
-        SedoricSystemSector systemSector = SedoricSystemSector.fromInputStream(
-                new ByteArrayInputStream(disk
-                        .getSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
-                                Constants.SEDORIC_SYSTEM_SECTOR))));
-        LOGGER.debug("Got system sector " + systemSector);
-        name.set(systemSector.getName().trim());
-        initString.set(systemSector.getInitString().trim());
-        if (systemSector.getPenColor() != null) {
-            penColor.set(systemSector.getPenColor());
-        }
-        if (systemSector.getPaperColor() != null) {
-            paperColor.set(systemSector.getPaperColor());
+        if (DskUtil.getDiskFormat(disk) == DiskFormat.ORICDOS) {
+            OricDosDirectory.fromDisk(disk).forEach(d ->
+                d.getArchive(disk).map(t -> {
+                    addArchive(ArchiveUtil.updateArchiveName(t, context));
+                    return true;
+                }).orElse(false));
+        } else {
+            SedoricDirectory.fromDisk(disk).forEach(d -> {
+                LOGGER.info("Read directory " + d);
+                SedoricArchive archive = d.getArchive(disk);
+                addArchive(ArchiveUtil.updateArchiveName(archive, context));
+            });
+            SedoricSystemSector systemSector = SedoricSystemSector.fromInputStream(
+                    new ByteArrayInputStream(disk
+                            .getSector(new SectorCoordinates(Constants.SEDORIC_DIRECTORY_TRACK,
+                                    Constants.SEDORIC_SYSTEM_SECTOR))));
+            LOGGER.debug("Got system sector " + systemSector);
+            name.set(systemSector.getName().trim());
+            initString.set(systemSector.getInitString().trim());
+            if (systemSector.getPenColor() != null) {
+                penColor.set(systemSector.getPenColor());
+            }
+            if (systemSector.getPaperColor() != null) {
+                paperColor.set(systemSector.getPaperColor());
+            }
         }
 
         setDiskGeometry(disk.getGeometry());
