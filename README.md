@@ -5,7 +5,7 @@ A little java application to manage Oric Microdisc Disk images.
 This is a work in progress and probably plagued with bugs.
 
 List of current features:
-- Supports Sedoric filesystems
+- Supports Sedoric and Oric DOS filesystems
 - Opens old and new (MFM) dsk images
 - Imports files from TAP archives
 - Allows to define the target disk geometry (sides, tracks, sectors)
@@ -23,7 +23,7 @@ java (8 or newer) and maven (3 or newer) are needed. Once you have cloned the re
 ## Running the application
 Probably double clicking the generated jar would be enough. Otherwise, you can run it on a console by executing:
 
-    java -jar oric-dsk-manager-jar-with-dependencies-0.6.jar
+    java -jar oric-dsk-manager-jar-with-dependencies-0.7.jar
     
 ## Usage
 Just drop archives from the host filesystem to the file list on the left side. They would be autodetected as old or new DSK images, TAPs or regular files. Menu entries are also provided for this function.
