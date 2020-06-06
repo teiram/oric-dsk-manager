@@ -12,6 +12,8 @@ List of current features:
 - Generates Sedoric bootable images
 - Allows modification of the disk name and init string
 - Exports files from a DSK image with a custom header if needed
+- Exports files from a DSK as binary files (no header)
+- Exports files from a DSK as TAP files
 - Automodifies file names to avoid clashing with already present files
 - Disk usage bar
 
@@ -23,7 +25,7 @@ java (8 or newer) and maven (3 or newer) are needed. Once you have cloned the re
 ## Running the application
 Probably double clicking the generated jar would be enough. Otherwise, you can run it on a console by executing:
 
-    java -jar oric-dsk-manager-jar-with-dependencies-0.7.jar
+    java -jar oric-dsk-manager-jar-with-dependencies-0.8.jar
     
 ## Usage
 Just drop archives from the host filesystem to the file list on the left side. They would be autodetected as old or new DSK images, TAPs or regular files. Menu entries are also provided for this function.
