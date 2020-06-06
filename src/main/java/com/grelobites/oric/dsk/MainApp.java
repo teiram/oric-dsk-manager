@@ -44,7 +44,9 @@ public class MainApp extends Application {
                 openDskMenuItem(scene, applicationContext),
                 mergeDskMenuItem(scene, applicationContext),
                 saveDskMenuItem(scene, applicationContext),
-                exportCurrentArchiveMenuItem(applicationContext));
+                exportCurrentArchiveMenuItem(applicationContext),
+                exportCurrentArchiveAsBinaryMenuItem(applicationContext),
+                exportCurrentArchiveAsTapMenuItem(applicationContext));
 
         if (menuToolkit == null) {
             fileMenu.getItems().add(new SeparatorMenuItem());
@@ -106,6 +108,53 @@ public class MainApp extends Application {
         });
         return exportArchive;
     }
+
+    private MenuItem exportCurrentArchiveAsBinaryMenuItem(ApplicationContext applicationContext) {
+        MenuItem exportArchive = new MenuItem(LocaleUtil.i18n("exportArchiveAsBinaryMenuEntry"));
+        exportArchive.setAccelerator(
+                KeyCombination.keyCombination("SHORTCUT+B")
+        );
+        exportArchive.disableProperty().bind(applicationContext
+                .archiveSelectedProperty().not());
+
+        exportArchive.setOnAction(f -> {
+            try {
+                applicationContext.exportCurrentArchiveAsBinary();
+            } catch (Exception e) {
+                LOGGER.error("Exporting current installable", e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
+            }
+        });
+        return exportArchive;
+    }
+
+    private MenuItem exportCurrentArchiveAsTapMenuItem(ApplicationContext applicationContext) {
+        MenuItem exportArchive = new MenuItem(LocaleUtil.i18n("exportArchiveAsTapMenuEntry"));
+        exportArchive.setAccelerator(
+                KeyCombination.keyCombination("SHORTCUT+T")
+        );
+        exportArchive.disableProperty().bind(applicationContext
+                .archiveSelectedProperty().not());
+
+        exportArchive.setOnAction(f -> {
+            try {
+                applicationContext.exportCurrentArchiveAsTap();
+            } catch (Exception e) {
+                LOGGER.error("Exporting current installable", e);
+                DialogUtil.buildErrorAlert(
+                        LocaleUtil.i18n("archiveOperationError"),
+                        LocaleUtil.i18n("archiveOperationErrorHeader"),
+                        LocaleUtil.i18n("archiveOperationGenericError"))
+                        .showAndWait();
+            }
+        });
+        return exportArchive;
+    }
+
 
     private MenuItem openDskMenuItem(Scene scene, ApplicationContext applicationContext) {
         MenuItem openDsk = new MenuItem(LocaleUtil.i18n("openDskMenuEntry"));
