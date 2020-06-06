@@ -176,6 +176,21 @@ public class ArchiveUtil {
         }
     }
 
+    public static void exportAsBinaryFile(SedoricArchive sourceArchive, File outputFile) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+            fos.write(sourceArchive.getData(), 0, sourceArchive.getSize());
+        }
+    }
+
+    public static void exportAsTapFile(File outputFile, SedoricArchive ...sources) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+            TapWriter tapWriter = new TapWriter(fos);
+            for (SedoricArchive source : sources) {
+                tapWriter.write(source);
+            }
+        }
+    }
+
     public static File toTemporaryFile(SedoricArchive sourceArchive) throws IOException {
         File file = new File(new File(System.getProperty("java.io.tmpdir")),
                 String.format("%s.%s", sourceArchive.getName().trim(), sourceArchive.getExtension().trim()));

@@ -178,6 +178,49 @@ public class ApplicationContext {
         }
     }
 
+    public void exportCurrentArchiveAsBinary() {
+        SedoricArchive archive = selectedArchive.get();
+        if (archive != null) {
+            DirectoryAwareFileChooser chooser = getFileChooser();
+            chooser.setTitle(LocaleUtil.i18n("exportCurrentArchive"));
+            chooser.setInitialFileName(String.format("%s.%s", archive.getName().trim(), archive.getExtension().trim()));
+            final File saveFile = chooser.showSaveDialog(applicationStage.getScene().getWindow());
+            if (saveFile != null) {
+                try {
+                    ArchiveUtil.exportAsBinaryFile(archive, saveFile);
+                } catch (IOException e) {
+                    LOGGER.error("Exporting current archive as binary", e);
+                }
+            }
+        } else {
+            DialogUtil.buildWarningAlert(LocaleUtil.i18n("exportCurrentArchiveErrorTitle"),
+                    LocaleUtil.i18n("exportCurrentArchiveErrorHeader"),
+                    LocaleUtil.i18n("exportCurrentArchiveNoArchiveSelected")).showAndWait();
+        }
+    }
+
+
+    public void exportCurrentArchiveAsTap() {
+        SedoricArchive archive = selectedArchive.get();
+        if (archive != null) {
+            DirectoryAwareFileChooser chooser = getFileChooser();
+            chooser.setTitle(LocaleUtil.i18n("exportCurrentArchive"));
+            chooser.setInitialFileName(String.format("%s.%s", archive.getName().trim(), archive.getExtension().trim()));
+            final File saveFile = chooser.showSaveDialog(applicationStage.getScene().getWindow());
+            if (saveFile != null) {
+                try {
+                    ArchiveUtil.exportAsTapFile(saveFile, archive);
+                } catch (IOException e) {
+                    LOGGER.error("Exporting current archive as tap", e);
+                }
+            }
+        } else {
+            DialogUtil.buildWarningAlert(LocaleUtil.i18n("exportCurrentArchiveErrorTitle"),
+                    LocaleUtil.i18n("exportCurrentArchiveErrorHeader"),
+                    LocaleUtil.i18n("exportCurrentArchiveNoArchiveSelected")).showAndWait();
+        }
+    }
+
     private static boolean confirmArchiveDeletion() {
         Optional<ButtonType> result = DialogUtil
                 .buildAlert(LocaleUtil.i18n("archiveDeletionConfirmTitle"),
