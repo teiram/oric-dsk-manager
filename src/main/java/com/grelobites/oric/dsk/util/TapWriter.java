@@ -47,7 +47,7 @@ public class TapWriter {
         stream.write(archive.getName()
                 .substring(0, Math.min(MAX_NAME_LENGTH, archive.getName().length())).getBytes());
         stream.write(ZERO_VALUE);
-        stream.write(archive.getData());
+        stream.write(archive.getData(), 0, archive.getSize());
     }
 
 }

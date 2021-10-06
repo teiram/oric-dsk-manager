@@ -92,12 +92,11 @@ public class SedoricArchive extends Archive {
     @Override
     public String toString() {
         return "SedoricArchive{" +
-                "Archive=" + super.toString() +
-                ", loadAddress=" + loadAddress +
+                "loadAddress=" + loadAddress +
                 ", execAddress=" + execAddress +
                 ", executableAttribute=" + executableAttribute +
                 ", blockAttribute=" + blockAttribute +
                 ", protectedAttribute=" + protectedAttribute +
-                '}';
+                "} " + super.toString();
     }
 }
